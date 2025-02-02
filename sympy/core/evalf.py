@@ -73,10 +73,10 @@ class PrecisionExhausted(ArithmeticError):
 #----------------------------------------------------------------------------#
 
 """
-An mpf value tuple is a tuple of integers (sign, man, exp, bc)
-representing a floating-point number: [1, -1][sign]*man*2**exp where
+An mpf value tuple is a tuple of integers ``(sign, man, exp, bc)``
+representing a floating-point number: ``[1, -1][sign]*man*2**exp`` where
 sign is 0 or 1 and bc should correspond to the number of bits used to
-represent the mantissa (man) in binary notation, e.g.
+represent the mantissa (``man``) in binary notation, e.g.
 """
 MPF_TUP = tTuple[int, int, int, int]  # mpf value tuple
 
@@ -90,13 +90,14 @@ Explanation
 >>> n, bitcount(man)
 (10, 3)
 
-A temporary result is a tuple (re, im, re_acc, im_acc) where
-re and im are nonzero mpf value tuples representing approximate
-numbers, or None to denote exact zeros.
+A temporary result is a tuple ``(re, im, re_acc, im_acc)`` where
+``re`` and ``im`` are nonzero mpf value tuples representing approximate
+numbers, or ``None`` to denote exact zeros.
 
-re_acc, im_acc are integers denoting log2(e) where e is the estimated
-relative accuracy of the respective complex part, but may be anything
-if the corresponding complex part is None.
+``re_acc``, ``im_acc`` are integers denoting ``log2(e)``
+where e is the estimated relative accuracy
+of the respective complex part,
+but may be anything if the corresponding complex part is ``None``.
 
 """
 TMP_RES = Any  # temporary result, should be some variant of
@@ -125,7 +126,7 @@ def fastlog(x: Optional[MPF_TUP]) -> tUnion[int, Any]:
     an exact power of 2) that would decrease the speed and is not
     necessary as this is only being used as an approximation for the
     number of bits in x. The correct return value could be written as
-    "x[2] + (x[3] if x[1] != 1 else 0)".
+    ``x[2] + (x[3] if x[1] != 1 else 0)``.
         Since mpf tuples always have an odd mantissa, no check is done
     to see if the mantissa is a multiple of 2 (in which case the
     result would be too large by 1).
@@ -148,7 +149,7 @@ def fastlog(x: Optional[MPF_TUP]) -> tUnion[int, Any]:
 
 
 def pure_complex(v: 'Expr', or_real=False) -> tuple['Number', 'Number'] | None:
-    """Return a and b if v matches a + I*b where b is not zero and
+    """Return a,b if v matches a + I*b where b is not zero and
     a and b are Numbers, else None. If `or_real` is True then 0 will
     be returned for `b` if `v` is a real number.
 
@@ -363,8 +364,8 @@ def check_target(expr: 'Expr', result: TMP_RES, prec: int):
 def get_integer_part(expr: 'Expr', no: int, options: OPT_DICT, return_ints=False) -> \
         tUnion[TMP_RES, tTuple[int, int]]:
     """
-    With no = 1, computes ceiling(expr)
-    With no = -1, computes floor(expr)
+    With no = 1, computes ``ceiling(expr)``.
+    With no = -1, computes ``floor(expr)``.
 
     Note: this function either gives the exact result or signals failure.
     """
@@ -1195,22 +1196,25 @@ def check_convergence(numer: 'Expr', denom: 'Expr', n: 'Symbol') -> tTuple[int, 
     Returns
     =======
 
-    (h, g, p) where
-    -- h is:
-        > 0 for convergence of rate 1/factorial(n)**h
-        < 0 for divergence of rate factorial(n)**(-h)
-        = 0 for geometric or polynomial convergence or divergence
+    .. code-block:: text
 
-    -- abs(g) is:
-        > 1 for geometric convergence of rate 1/h**n
-        < 1 for geometric divergence of rate h**n
-        = 1 for polynomial convergence or divergence
+        (h, g, p) where
 
-        (g < 0 indicates an alternating series)
+        -- h is:
+            > 0 for convergence of rate 1/factorial(n)**h
+            < 0 for divergence of rate factorial(n)**(-h)
+            = 0 for geometric or polynomial convergence or divergence
 
-    -- p is:
-        > 1 for polynomial convergence of rate 1/n**h
-        <= 1 for polynomial divergence of rate n**(-h)
+        -- abs(g) is:
+            > 1 for geometric convergence of rate 1/h**n
+            < 1 for geometric divergence of rate h**n
+            = 1 for polynomial convergence or divergence
+
+            (g < 0 indicates an alternating series)
+
+        -- p is:
+            > 1 for polynomial convergence of rate 1/n**h
+            <= 1 for polynomial divergence of rate n**(-h)
 
     """
     from sympy.polys.polytools import Poly
@@ -1235,7 +1239,7 @@ def check_convergence(numer: 'Expr', denom: 'Expr', n: 'Symbol') -> tTuple[int, 
 def hypsum(expr: 'Expr', n: 'Symbol', start: int, prec: int) -> mpf:
     """
     Sum a rapidly convergent infinite hypergeometric series with
-    given general term, e.g. e = hypsum(1/factorial(n), n). The
+    given general term, e.g. ``e = hypsum(1/factorial(n), n)``. The
     quotient between successive terms must be a quotient of integer
     polynomials.
     """
@@ -1560,7 +1564,7 @@ class EvalfMixin:
 
     def evalf(self, n=15, subs=None, maxn=100, chop=False, strict=False, quad=None, verbose=False):
         """
-        Evaluate the given formula to an accuracy of *n* digits.
+        Evaluate the given formula to an accuracy of ``n`` digits.
 
         Parameters
         ==========
@@ -1617,7 +1621,7 @@ class EvalfMixin:
         >>> (x + y - z).subs(values)
         0
 
-        Using the subs argument for evalf is the accurate way to
+        Using the ``subs`` argument for evalf is the accurate way to
         evaluate such an expression:
 
         >>> (x + y - z).evalf(subs=values)
@@ -1726,15 +1730,17 @@ class EvalfMixin:
             return make_mpc((re, im))
 
 
-def N(x, n=15, **options):
+def N(x, n: int=15, **options: OPT_DICT) -> TMP_RES:
     r"""
-    Calls x.evalf(n, \*\*options).
+    Calls ``x.evalf(prec=n, **options)``
+    to evaluate ``x`` to a binary precision of ``n``.
 
     Explanations
     ============
 
-    Both .n() and N() are equivalent to .evalf(); use the one that you like better.
-    See also the docstring of .evalf() for information on the options.
+    Both ``.n()`` and ``N()`` are equivalent to ``.evalf()``;
+    use the one that you like better.
+    See also the docstring of ``.evalf()`` for information on the options.
 
     Examples
     ========
@@ -1756,7 +1762,7 @@ def _evalf_with_bounded_error(x: 'Expr', eps: 'Optional[Expr]' = None,
                               m: int = 0,
                               options: Optional[OPT_DICT] = None) -> TMP_RES:
     """
-    Evaluate *x* to within a bounded absolute error.
+    Evaluate ``x`` to within a bounded absolute error.
 
     Parameters
     ==========
@@ -1766,7 +1772,7 @@ def _evalf_with_bounded_error(x: 'Expr', eps: 'Optional[Expr]' = None,
     eps : Expr, None, optional (default=None)
         Positive real upper bound on the acceptable error.
     m : int, optional (default=0)
-        If *eps* is None, then use 2**(-m) as the upper bound on the error.
+        If ``eps`` is None, then use 2**(-m) as the upper bound on the error.
     options: OPT_DICT
         As in the ``evalf`` function.
 
